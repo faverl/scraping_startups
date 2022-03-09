@@ -1,0 +1,18 @@
+{
+  "name": "scraping_startups",
+  "version": "1.0.0",
+  "description": "This is a test for data scraping of the startup Colombia 2021.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Faver Lopez",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {
+    "xlsx": "0.18.3",
+    "@playwright/test": "1.19.2",
+    "playwright": "1.19.2"
+  }
+}
