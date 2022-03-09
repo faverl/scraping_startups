@@ -58,6 +58,7 @@ const { test, expect, chromium} = require('@playwright/test');
       
       await page.fill('[placeholder="Escriba el término de búsqueda"]  >> nth=1',listaEmpresas[index]);
 
+      /* 
       const locator =  await page.locator('body > canvas-control-editor > div > div > div > list-control > div > md-virtual-repeat-container > div > div.md-virtual-repeat-offsetter > div > span');
 
       const resultado = await expect(locator).toHaveCount(0);
@@ -77,6 +78,8 @@ const { test, expect, chromium} = require('@playwright/test');
         console.log(informacionEmpresas);
         continue;
       }
+      */
+
       await page.locator(`text=${listaEmpresas[index]} solamente`).first().hover();
       await page.locator('body > canvas-control-editor > div > div > div > list-control > div > md-virtual-repeat-container > div > div.md-virtual-repeat-offsetter > div > span').first().click();
 
