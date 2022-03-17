@@ -3,7 +3,7 @@ const { test, expect, chromium} = require('@playwright/test');
 ;(async () => {
     const browser = await chromium.launch({ headless: false });
     const page = await browser.newPage();
-    await page.setDefaultTimeout(120000);
+    await page.setDefaultTimeout(30000);
     await page.goto('https://datastudio.google.com/u/0/reporting/24d0fd5c-e83f-4206-9b36-2c3f4dc39798/page/p_7o4u6m4uoc');
 
     const cantidadData = await page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(44) > canvas-component > div > div > div.component > div > div > lego-table > div > div.pageControl > div.pageLabel').first().textContent();
@@ -13,7 +13,7 @@ const { test, expect, chromium} = require('@playwright/test');
     const lista = Array();
 
     // Se calcularon la cantidad de paginas que se deben recorrer
-    for (let pag = 1; pag <= 1; pag++) {
+    for (let pag = 1; pag <= paginas; pag++) {
       let lineas = (pag == paginas) ? cantidad%10 : 10;
       let valor = (pag == 1) ? 2 : 3;
 
@@ -33,8 +33,9 @@ const { test, expect, chromium} = require('@playwright/test');
 
       // obtenemos el div que contiene la tabla y que controla el estado cuando se esta actualizando.
       const locator = page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(44) > canvas-component > div > div > div.component > div');
+      
       // Se espera hasta el elemento div no tenga la clase is-loading, lo que significa que ya termino de cargar las nuevas lineas de la página.
-      await expect(locator).not.toHaveClass(/is-loading/);
+      await expect(locator).not.toHaveClass(/is-loading/,{timeout:10000});
     }
 
     const listaEmpresas = Array();
@@ -58,13 +59,10 @@ const { test, expect, chromium} = require('@playwright/test');
       
       await page.fill('[placeholder="Escriba el término de búsqueda"]  >> nth=1',listaEmpresas[index]);
 
-      /* 
-      const locator =  await page.locator('body > canvas-control-editor > div > div > div > list-control > div > md-virtual-repeat-container > div > div.md-virtual-repeat-offsetter > div > span');
-
-      const resultado = await expect(locator).toHaveCount(0);
-
-      console.log(resultado);
-      if(resultado) {
+      try {
+        await page.locator(`text=${listaEmpresas[index]} solamente`).first().hover();
+      } catch (error) {
+        console.log("No hay resultados para el valor ingresado");
         datos['sectores'] = null;        
         datos['empleados'] = null;        
         datos['pubnlico'] = null;        
@@ -74,22 +72,19 @@ const { test, expect, chromium} = require('@playwright/test');
         datos['web'] = null;        
         datos['linkendin'] = null;        
         datos['score'] = null;        
-        informacionEmpresas[listaEmpresas[index]] = datos;
-        console.log(informacionEmpresas);
+        informacionEmpresas[`${listaEmpresas[index]}`] = datos;
+        console.log(listaEmpresas[index],' : ',datos);
         continue;
       }
-      */
 
-      await page.locator(`text=${listaEmpresas[index]} solamente`).first().hover();
-      await page.locator('body > canvas-control-editor > div > div > div > list-control > div > md-virtual-repeat-container > div > div.md-virtual-repeat-offsetter > div > span').first().click();
+      await page.locator(`text=${listaEmpresas[index]} solamente >> span[role="button"]`).first().click();
 
       // Datos de la empresa
 
       // Sectores
       const locatorSector = page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(22) > canvas-component > div > div > div.component > div');
 
-      // Se espera hasta el elemento div no tenga la clase is-loading, lo que significa que ya termino de cargar las nuevas lineas de la página.
-      await expect(locatorSector).not.toHaveClass(/is-loading/);
+      await expect(locatorSector).not.toHaveClass(/is-loading/,{timeout:20000});
 
       datos['sectores'] = await page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(22) > canvas-component > div > div > div.component > div > div > lego-table > div > div.tableBody > div.row.block-0 > div').textContent();
 
@@ -97,8 +92,7 @@ const { test, expect, chromium} = require('@playwright/test');
 
       const locatorEmpleado = page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(40) > canvas-component > div > div > div.component > div ');
 
-      // Se espera hasta el elemento div no tenga la clase is-loading, lo que significa que ya termino de cargar las nuevas lineas de la página.
-      await expect(locatorEmpleado).not.toHaveClass(/is-loading/);
+      await expect(locatorEmpleado).not.toHaveClass(/is-loading/,{timeout:10000});
 
       datos['empleados'] = await page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(40) > canvas-component > div > div > div.component > div > div > lego-table > div > div.tableBody > div.row.block-0 > div').textContent();
 
@@ -106,8 +100,7 @@ const { test, expect, chromium} = require('@playwright/test');
 
       const locatorPublico = page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(28) > canvas-component > div > div > div.component > div ');
 
-      // Se espera hasta el elemento div no tenga la clase is-loading, lo que significa que ya termino de cargar las nuevas lineas de la página.
-      await expect(locatorPublico).not.toHaveClass(/is-loading/);
+      await expect(locatorPublico).not.toHaveClass(/is-loading/,{timeout:10000});
 
       datos['publico'] = await page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(28) > canvas-component > div > div > div.component > div > div > lego-table > div > div.tableBody > div.row.block-0 > div').textContent();
 
@@ -115,8 +108,7 @@ const { test, expect, chromium} = require('@playwright/test');
 
       const locatorFundacion = page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(29) > canvas-component > div > div > div.component > div ');
 
-      // Se espera hasta el elemento div no tenga la clase is-loading, lo que significa que ya termino de cargar las nuevas lineas de la página.
-      await expect(locatorFundacion).not.toHaveClass(/is-loading/);
+      await expect(locatorFundacion).not.toHaveClass(/is-loading/,{timeout:10000});
 
       datos['fundacion'] = await page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(29) > canvas-component > div > div > div.component > div > div > lego-table > div > div.tableBody > div.row.block-0 > div').textContent();
 
@@ -124,8 +116,7 @@ const { test, expect, chromium} = require('@playwright/test');
 
       const locatorCiudad = page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(30) > canvas-component > div > div > div.component > div ');
 
-      // Se espera hasta el elemento div no tenga la clase is-loading, lo que significa que ya termino de cargar las nuevas lineas de la página.
-      await expect(locatorCiudad).not.toHaveClass(/is-loading/);
+      await expect(locatorCiudad).not.toHaveClass(/is-loading/,{timeout:10000});
 
       datos['ciudad'] = await page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(30) > canvas-component > div > div > div.component > div > div > lego-table > div > div.tableBody > div.row.block-0 > div').textContent();
 
@@ -133,8 +124,7 @@ const { test, expect, chromium} = require('@playwright/test');
 
       const locatorDepartamento = page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(31) > canvas-component > div > div > div.component > div ');
 
-      // Se espera hasta el elemento div no tenga la clase is-loading, lo que significa que ya termino de cargar las nuevas lineas de la página.
-      await expect(locatorDepartamento).not.toHaveClass(/is-loading/);
+      await expect(locatorDepartamento).not.toHaveClass(/is-loading/,{timeout:10000});
 
       datos['departamento'] = await page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(31) > canvas-component > div > div > div.component > div > div > lego-table > div > div.tableBody > div.row.block-0 > div').textContent();
 
@@ -142,8 +132,7 @@ const { test, expect, chromium} = require('@playwright/test');
 
       const locatorWeb = page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(33) > canvas-component > div > div > div.component > div ');
 
-      // Se espera hasta el elemento div no tenga la clase is-loading, lo que significa que ya termino de cargar las nuevas lineas de la página.
-      await expect(locatorWeb).not.toHaveClass(/is-loading/);
+      await expect(locatorWeb).not.toHaveClass(/is-loading/,{timeout:10000});
 
       datos['web'] = await page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(33) > canvas-component > div > div > div.component > div > div > lego-table > div > div.tableBody > div.row.block-0 > div > a').textContent();
 
@@ -151,28 +140,23 @@ const { test, expect, chromium} = require('@playwright/test');
 
       const locatorLinkenin = page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(35) > canvas-component > div > div > div.component > div ');
 
-      // Se espera hasta el elemento div no tenga la clase is-loading, lo que significa que ya termino de cargar las nuevas lineas de la página.
-      await expect(locatorLinkenin).not.toHaveClass(/is-loading/);
+      await expect(locatorLinkenin).not.toHaveClass(/is-loading/,{timeout:10000});
 
       datos['linkendin'] = await page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(35) > canvas-component > div > div > div.component > div > div > lego-table > div > div.tableBody > div.row.block-0 > div > a').textContent();
 
       // DMS Score
-
       const locatorScore = page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(37) > canvas-component > div > div > div.component > div ');
 
-      // Se espera hasta el elemento div no tenga la clase is-loading, lo que significa que ya termino de cargar las nuevas lineas de la página.
-      await expect(locatorScore).not.toHaveClass(/is-loading/);
+      await expect(locatorScore).not.toHaveClass(/is-loading/,{timeout:10000});
 
       datos['score'] = await page.locator('#body > div > div > div.lego-reporting-view.activity-view.no-licensed.new-resizer.left-nav-full > div.page > div > div.mainBlock > div.alignHolder > div.scaleSizeHolder > div > lego-report > lego-canvas-container > div > file-drop-zone > span > content-section > div:nth-child(37) > canvas-component > div > div > div.component > div > div > lego-table > div > div.tableBody > div.row.block-0 > div').textContent();
 
-      // Se preseiona la tecla escape
-      // await page.keyboard.press('Escape');
-
-      informacionEmpresas[listaEmpresas[index]] = datos;
-      console.log(informacionEmpresas);
-      //await page.pause();
+      informacionEmpresas[`${listaEmpresas[index]}`] = datos;
+      console.log(listaEmpresas[index],' : ',datos);
     }
 
-    //await page.screenshot({ path: `image.png` });
+    console.log(informacionEmpresas);
+    console.log("Se Comleto el proceso de toma de información.");
+    //await page.pause();
     await browser.close();
 })();
