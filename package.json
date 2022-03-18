@@ -9,10 +9,9 @@
   },
   "author": "Faver Lopez",
   "license": "ISC",
-  "devDependencies": {},
   "dependencies": {
-    "xlsx": "0.18.3",
     "@playwright/test": "1.19.2",
+    "exceljs": "^4.3.0",
     "playwright": "1.19.2"
   }
 }
