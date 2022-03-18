@@ -1,6 +1,7 @@
 const { test, expect, chromium} = require('@playwright/test');
+const excel = require('exceljs');
 
-;(async () => {
+const obtenerDatos = async () => {
     const browser = await chromium.launch({ headless: false });
     const page = await browser.newPage();
     await page.setDefaultTimeout(30000);
@@ -63,15 +64,15 @@ const { test, expect, chromium} = require('@playwright/test');
         await page.locator(`text=${listaEmpresas[index]} solamente`).first().hover();
       } catch (error) {
         console.log("No hay resultados para el valor ingresado");
-        datos['sectores'] = null;        
-        datos['empleados'] = null;        
-        datos['pubnlico'] = null;        
-        datos['fundacion'] = null;        
-        datos['ciudad'] = null;        
-        datos['departamento'] = null;        
-        datos['web'] = null;        
-        datos['linkendin'] = null;        
-        datos['score'] = null;        
+        datos['sectores'] = 'null';        
+        datos['empleados'] = 'null';        
+        datos['publico'] = 'null';        
+        datos['fundacion'] = 'null';        
+        datos['ciudad'] = 'null';        
+        datos['departamento'] = 'null';        
+        datos['web'] = 'null';        
+        datos['linkendin'] = 'null';        
+        datos['score'] = 'null';        
         informacionEmpresas[`${listaEmpresas[index]}`] = datos;
         console.log(listaEmpresas[index],' : ',datos);
         continue;
@@ -155,8 +156,41 @@ const { test, expect, chromium} = require('@playwright/test');
       console.log(listaEmpresas[index],' : ',datos);
     }
 
-    console.log(informacionEmpresas);
     console.log("Se Comleto el proceso de toma de información.");
     //await page.pause();
     await browser.close();
-})();
+
+    const libroExcel = new excel.Workbook();
+    const nombreArchivo = `datosStartups.xlsx`;
+    const hojaExcel = libroExcel.addWorksheet('datos');
+
+    const cabeceraColumnas = [
+      { header:'Empresa', key:'empresa' },
+      { header:'Sectores', key:'sectores' },
+      { header:'Empleados', key:'empleados' },
+      { header:'Publico', key:'publico' },
+      { header:'Fundacion', key:'fundacion' },
+      { header:'Ciudad', key:'ciudad' },
+      { header:'Departamento', key:'departamento' },
+      { header:'Web', key:'web' },
+      { header:'Linkendin', key:'linkendin' },
+      { header:'Score', key:'score' },
+    ]
+
+    hojaExcel.columns = cabeceraColumnas;
+
+    for (const key of listaEmpresas) { 
+      informacionEmpresas[key]['empresa'] = key;
+      const datos =  informacionEmpresas[key];
+      hojaExcel.addRow([datos['empresa'],datos['sectores'],datos['empleados'],datos['publico'],datos['fundacion'],datos['ciudad'],datos['departamento'],datos['web'],datos['linkendin'],datos['score']]);
+    }
+
+    libroExcel.xlsx.writeFile(nombreArchivo).then((e)=>{
+      console.log('Se crea archivo de excel de forma exitosa.');
+    })
+    .catch(()=>{
+      console.log('Se genero error al crear el archivo.');
+    })
+};
+
+obtenerDatos();
